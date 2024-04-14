@@ -162,4 +162,6 @@ class Hotel:
     def load_booking(file):
         with open(file) as f:
             return [BookingApplic(*[x for x in line.split()]) for line in f]
-
+    '''
+    def calculate_price(self):
+    '''
