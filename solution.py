@@ -7,6 +7,9 @@ class Apartment():
         self.__capacity = capacity
         self.__comfort = comfort
         self.__price_per_person = 0.0
+        self.__occupied = False
+        self.__occupation_start = None
+        self.__occupation_end = None
 
     @property
     def number(self):
@@ -31,6 +34,32 @@ class Apartment():
     @price_per_person.setter
     def price_per_person(self, value):
         self.__price_per_person = value
+
+    @property
+    def occupied(self):
+        return self.__occupied
+    
+    @occupied.setter
+    def occupied(self, value):
+        if not isinstance(value, bool):
+            raise ValueError("Occupied must be a boolean value")
+        self.__occupied = value
+
+    @property
+    def occupation_start(self):
+        return self.__occupation_start
+    
+    @occupation_start.setter
+    def occupation_start(self, value):
+        self.__occupation_start = datetime.date(value.split(".")[2], value.split(".")[1], value.split(".")[0])
+
+    @property
+    def occupation_end(self):
+        return self.__occupation_end
+    
+    @occupation_end.setter
+    def occupation_end(self, value):
+        self.__occupation_end = datetime.date(value.split(".")[2], value.split(".")[1], value.split(".")[0])
 
 class BookingApplic:
     def __init__(self, booking_date, last_name, first_name, family_name, people_count, accomod_date, accomod_days, max_spend_per_person):
