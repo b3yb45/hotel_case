@@ -117,11 +117,11 @@ class Hotel:
     }
 
     def __init__(self, apartments_file, booking_file):
-        self.__apartmnents = self.__load_apartments(apartments_file)
-        self.__booking = self.__load_booking
+        self.__apartmnents = self.load_apartments(apartments_file)
+        self.__booking = self.load_booking(booking_file)
 
     @staticmethod
-    def __load_apartments(file):
+    def load_apartments(file):
         with open(file) as f:
             return [Apartment(*[int(x) for x in line.split()]) for line in f]
     
@@ -130,7 +130,7 @@ class Hotel:
             apartment.price_per_person = self.__type_price[apartment.type] * self.__comfort_price_coefficient[apartment.comfort]
 
     @staticmethod
-    def booking_input(file):
+    def load_booking(file):
         with open(file) as f:
             return [BookingApplic(*[x for x in line.split()]) for line in f]
 
