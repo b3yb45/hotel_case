@@ -44,8 +44,6 @@ class BookingApplic:
         self.__max_spend_per_person = max_spend_per_person
         self.__price_per_person = 0.0
 
-
-    #Вставить изменения типов атрибутов на соответствующие
     @property
     def booking_date(self):
         return self.__booking_date
