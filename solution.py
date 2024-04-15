@@ -152,11 +152,11 @@ class Hotel:
     }
 
     def __init__(self, apartments_file, booking_file):
-        self.__apartmnents = self.load_apartments(apartments_file)
+        self.__apartments = self.load_apartments(apartments_file)
         self.__bookings = self.load_booking(booking_file)
         self.total_profit = 0
         self.loss_profit = 0
-        self.free_aparts = len(self.__apartmnents)
+        self.free_aparts = len(self.__apartments)
         self.occupied_aparts = 0
         self.apart_hier = {1: {}, 2: {}, 3: {}, 4: {}, 5: {}, 6: {}}
         
@@ -166,7 +166,7 @@ class Hotel:
                     result_key = key_type + ' ' + key_comfort
                     self.apart_hier[capacity][result_key] = []
         
-        for apart in self.__apartmnents:
+        for apart in self.__apartments:
             apart_type = apart.type + ' ' + apart.comfort
             self.apart_hier[apart.capacity][apart_type].append(apart)
         
@@ -177,7 +177,7 @@ class Hotel:
 
     @property
     def apartments(self):
-        return self.__apartmnents
+        return self.__apartments
     
     @staticmethod
     def load_apartments(file):
@@ -185,7 +185,7 @@ class Hotel:
             return [Apartment(*[x for x in line.split()]) for line in f]
     
     def set_price_per_person(self):
-        for apartment in self.__apartmnents:
+        for apartment in self.__apartments:
             apartment.__price_per_person = self.__type_price[apartment.type] * self.__comfort_price_coefficient[apartment.comfort]
 
             for catering in Hotel.__catering_price:
