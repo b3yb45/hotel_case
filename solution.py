@@ -135,8 +135,9 @@ class BookingApplic:
         return self.__price_per_person
 
     def __str__(self):
-        return self.booking_date() + self.last_name() + self.first_name() + self.family_name() + \
-            self.accomod_date()
+        accom_date = '.'.join([str(x) for x in self.accomod_date])
+        return self.booking_date + ' ' +  self.last_name + ' ' + self.first_name + ' ' + self.family_name + ' ' + \
+            accom_date
 
 class Hotel:
     __type_price = {
@@ -180,6 +181,12 @@ class Hotel:
             for apart_type in self.apart_hier[key].copy():
                 if self.apart_hier[key][apart_type] == []:
                     del self.apart_hier[key][apart_type]
+        
+        for apartment in self.__apartmnents:
+            apartment.price_per_person = self.__type_price[apartment.type] * self.__comfort_price_coefficient[apartment.comfort]
+
+            for catering in Hotel.__catering_price:
+                apartment.price_with_catering[catering] = apartment.price_per_person + Hotel.__catering_price[catering]
 
     @property
     def apartments(self):
@@ -189,15 +196,7 @@ class Hotel:
     def load_apartments(file):
         with open(file, encoding='utf-8') as f:
             return [Apartment(*[x for x in line.split()]) for line in f]
-    
 
-    def set_price_per_person(self):
-        for apartment in self.__apartmnents:
-            apartment.__price_per_person = self.__type_price[apartment.type] * self.__comfort_price_coefficient[apartment.comfort]
-
-            for catering in Hotel.__catering_price:
-                apartment.__price_with_catering[catering] = apartment.price_per_person + Hotel.__catering_price[catering]
-    
 
     def calculate_price(self, booking: BookingApplic):
         discount = False
@@ -213,8 +212,7 @@ class Hotel:
 
             result_date = f'{date.day}.{month}.{date.year}'
             booking_period.append(result_date) #список дат, на которые клиент желает заселиться
-        print(booking_period)
-
+        
         for capacity in range(booking.people_count, 7):
             if capacity != booking.people_count:
                 discount = True
@@ -222,25 +220,25 @@ class Hotel:
             for apart_type in self.apart_hier[capacity]: #идем по вместимости
 
                 for apart in self.apart_hier[capacity][apart_type]: #идем по классу номера
-                    if apart.price_per_person * (1 - disc_coef*discount) <= booking.max_spend_per_person and \
-                        set(booking_period).intersection(apart.occupied_set) == set(): #смотрим, подходит ли по цене и не занят ли номер на эти даты
-
+                    if apart.price_per_person * (1 - disc_coef*discount) <= booking.max_spend_per_person \
+                        and set(booking_period).intersection(apart.occupied_set) == set(): #смотрим, подходит ли по цене и не занят ли номер на эти даты
+    
                         for catering in apart.price_with_catering:
                             if apart.price_with_catering[catering] * (1 - disc_coef*discount) <= booking.max_spend_per_person:
                                 offer_price = apart.price_with_catering[catering]
                                 answer = random.choice([0, 1, 2, 3])
 
                                 if answer != 0:
-                                    self.total_profit += offer_price * booking.accomod_days
-                                    apart.occupied_set.add(set(booking_period))
-                                    self.free_aparts += 1
+                                    self.total_profit += offer_price * booking.accomod_days * booking.people_count
+                                    apart.occupied_set.add(x for x in booking_period)
+                                    self.occupied_aparts += 1
                                     success = True
                                     msg = f'{booking} забронировал {apart}'
                                     print(msg)
                                 else:
-                                    self.loss_profit += offer_price * booking.accomod_days
+                                    self.loss_profit += offer_price * booking.accomod_days * booking.people_count
                                     print('Клиент отказался от предложения.')
-                                break
+                                
 
         if success == False:
             self.loss_profit += booking.max_spend_per_person
@@ -263,6 +261,8 @@ class Model:
         
         for booking in bookings_list:
             self.hotel.calculate_price(booking)
+        print('Суммарная вырчука: ', self.hotel.total_profit)
+        print('Потерянная выручка: ', self.hotel.loss_profit)
             
 
         
