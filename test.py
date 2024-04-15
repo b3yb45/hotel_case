@@ -1,4 +1,5 @@
-from solution import Hotel
+from solution import Hotel, Model
 
-hotel = Hotel('fund.txt', 'booking.txt')
-print(hotel.apart_hier)
+hotel = Hotel('fund.txt')
+model = Model(hotel)
+model.start('booking.txt')
