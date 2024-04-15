@@ -7,6 +7,7 @@ class Apartment():
         self.__capacity = capacity
         self.__comfort = comfort
         self.__price_per_person = 0.0
+        self.__price_with_catering = {}
         self.__occupied = False
         self.__occupation_start = None
         self.__occupation_end = None
@@ -60,6 +61,9 @@ class Apartment():
     @occupation_end.setter
     def occupation_end(self, value):
         self.__occupation_end = datetime.date(value.split(".")[2], value.split(".")[1], value.split(".")[0])
+    
+    def __repr__(self) -> str:
+        return ' '.join([self.number, self.capacity, self.comfort, self.type])
 
 class BookingApplic:
     def __init__(self, booking_date, last_name, first_name, family_name, people_count, accomod_date, accomod_days, max_spend_per_person):
@@ -149,19 +153,42 @@ class Hotel:
         self.__apartmnents = self.load_apartments(apartments_file)
         self.__booking = self.load_booking(booking_file)
 
+        self.apart_hier = {}
+        
+        for key_type in Hotel.__type_price:
+            for key_comfort in Hotel.__comfort_price_coefficient:
+                result_key = key_type + ' ' + key_comfort
+                self.apart_hier[result_key] = []
+        
+        for apart in self.__apartmnents:
+            apart_type = apart.type + ' ' + apart.comfort
+            self.apart_hier[apart_type].append(apart)
+        
+        for key in self.apart_hier.copy():
+            if self.apart_hier[key] == []:
+                del self.apart_hier[key]
+
+    @property
+    def apartments(self):
+        return self.__apartmnents
+    
     @staticmethod
     def load_apartments(file):
-        with open(file) as f:
-            return [Apartment(*[int(x) for x in line.split()]) for line in f]
+        with open(file, encoding='utf-8') as f:
+            return [Apartment(*[x for x in line.split()]) for line in f]
     
     def set_price_per_person(self):
         for apartment in self.__apartmnents:
-            apartment.price_per_person = self.__type_price[apartment.type] * self.__comfort_price_coefficient[apartment.comfort]
+            apartment.__price_per_person = self.__type_price[apartment.type] * self.__comfort_price_coefficient[apartment.comfort]
+
+            for catering in Hotel.__catering_price:
+                apartment.__price_with_catering[catering] = apartment.price_per_person + Hotel.__catering_price[catering]
 
     @staticmethod
     def load_booking(file):
-        with open(file) as f:
+        with open(file, encoding='utf-8') as f:
             return [BookingApplic(*[x for x in line.split()]) for line in f]
     '''
     def calculate_price(self):
-    '''
+    '''  
+    
