@@ -13,7 +13,7 @@ class Apartment():
         self.__occupation_start = None
         self.__occupation_end = None
         self.occupied_set = set()
-
+    
     @property
     def number(self):
         return self.__number
@@ -265,7 +265,7 @@ class Model:
 
         date_lst = []
         
-        for i in range(1, 32):
+        for i in range(32):
             date = datetime.date(year=int(self.start_date.split('.')[-1]), month=int(self.start_date.split('.')[-2]), \
                                  day=int(self.start_date.split('.')[-3])) + datetime.timedelta(days=i)
             
