@@ -213,7 +213,7 @@ class Hotel:
 
             result_date = f'{date.day}.{month}.{date.year}'
             booking_period.append(result_date) #список дат, на которые клиент желает заселиться
-            capacity = booking.people_count
+        capacity = booking.people_count
 
         while success == False and capacity < 7 and refuse == False:
             if capacity != booking.people_count:
@@ -249,11 +249,12 @@ class Hotel:
 
 
 class Model:
-    def __init__(self, hotel: Hotel):
+    def __init__(self, hotel: Hotel, start_date):
         self.daily_profit = 0
         self.daily_loss_profit = 0
         self.hotel = hotel
-    
+        self.start_date = start_date
+
     @staticmethod
     def load_booking(file):
         with open(file, encoding='utf-8') as f:
@@ -261,12 +262,40 @@ class Model:
     
     def start(self, booking_file):
         bookings_list = Model.load_booking(booking_file)
+
+        date_lst = []
         
-        for booking in bookings_list:
-            self.hotel.calculate_price(booking)
+        for i in range(1, 32):
+            date = datetime.date(year=int(self.start_date.split('.')[-1]), month=int(self.start_date.split('.')[-2]), \
+                                 day=int(self.start_date.split('.')[-3])) + datetime.timedelta(days=i)
+            
+            month = date.month if len(str(date.month)) == 2 else f'0{date.month}'
+            day = date.day if len(str(date.day)) == 2 else f'0{date.day}'
+            result_date = f'{day}.{month}.{date.year}'
+            date_lst.append(result_date)
+
+        yest_profit = 0
+        yest_loss = 0
+
+        for date in date_lst:
+            print(date)
+            daily_bookings = filter(lambda x: x.booking_date == date, bookings_list) 
+
+            for booking in daily_bookings:
+                self.hotel.calculate_price(booking)
+
+            self.daily_profit = self.hotel.total_profit - yest_profit
+            yest_profit = self.hotel.total_profit
+            self.daily_loss_profit = self.hotel.loss_profit - yest_loss
+            yest_loss = self.hotel.loss_profit
+            print('Полученная за день выручка: ', self.daily_profit)
+            print('Потерянная за день выручка: ', self.daily_loss_profit)
+            print()
+
         print('Суммарная вырчука: ', self.hotel.total_profit)
         print('Потерянная выручка: ', self.hotel.loss_profit)
-            
+        
+
 
         
                
