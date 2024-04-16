@@ -13,9 +13,6 @@ class Apartment:
     - __comfort (str): The comfort level of the apartment.
     - __price_per_person (float): The price per person for the apartment.
     - price_with_catering (dict): A dictionary to store prices with catering options.
-    - __occupied (bool): Indicates if the apartment is currently occupied.
-    - __occupation_start (datetime.date): The start date of the occupation.
-    - __occupation_end (datetime.date): The end date of the occupation.
     - occupied_set (set): A set to store occupied apartments.
 
     Properties:
@@ -25,9 +22,6 @@ class Apartment:
     - capacity: Getter for the apartment capacity.
     - comfort: Getter for the apartment comfort level.
     - price_per_person: Getter and setter for the price per person.
-    - occupied: Getter and setter for the occupied status.
-    - occupation_start: Getter and setter for the occupation start date.
-    - occupation_end: Getter and setter for the occupation end date.
     '''
 
     def __init__(self, number, type, capacity, comfort):
@@ -262,17 +256,17 @@ class Hotel:
                                  day=booking.accomod_date[-3]) + datetime.timedelta(days=i)
 
             result_date = f'{date.day:02d}.{date.month:02d}.{date.year}'
-            booking_period.append(result_date) #список дат, на которые клиент желает заселиться
+            booking_period.append(result_date)
         capacity = booking.people_count
 
         while (not success) and capacity < 7 and (not refuse):
             if capacity != booking.people_count:
                 discount = True
 
-            for apart_type in self.apart_hier[capacity]: #идем по вместимости
+            for apart_type in self.apart_hier[capacity]:
                 for apart in self.apart_hier[capacity][apart_type]: 
                     if apart.price_per_person * (1 - disc_coef*discount) <= booking.max_spend_per_person and \
-                        set(booking_period).intersection(apart.occupied_set) == set() and (not refuse) and (not success): #смотрим, подходит ли по цене и не занят ли номер на эти даты
+                        set(booking_period).intersection(apart.occupied_set) == set() and (not refuse) and (not success):
     
                         for catering in apart.price_with_catering:
                             if apart.price_with_catering[catering] * (1 - disc_coef*discount) <= booking.max_spend_per_person:
@@ -357,7 +351,7 @@ class Model:
             yest_profit = self.hotel.total_profit
             self.daily_loss_profit = self.hotel.loss_profit - yest_loss
             yest_loss = self.hotel.loss_profit
-            print()
+            print('')
             print('Полученная за день выручка: ', self.daily_profit)
             print('Потерянная за день выручка: ', self.daily_loss_profit)
             
