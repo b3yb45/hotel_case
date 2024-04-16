@@ -37,9 +37,6 @@ class Apartment:
         self.__comfort = comfort
         self.__price_per_person = 0.0
         self.price_with_catering = {}
-        self.__occupied = False
-        self.__occupation_start = None
-        self.__occupation_end = None
         self.occupied_set = set()
     
     @property
@@ -65,35 +62,9 @@ class Apartment:
     @price_per_person.setter
     def price_per_person(self, value):
         self.__price_per_person = value
-
-    @property
-    def occupied(self):
-        return self.__occupied
-    
-    @occupied.setter
-    def occupied(self, value):
-        if not isinstance(value, bool):
-            raise ValueError("Occupied must be a boolean value")
-        self.__occupied = value
-
-    @property
-    def occupation_start(self):
-        return self.__occupation_start
-    
-    @occupation_start.setter
-    def occupation_start(self, value):
-        self.__occupation_start = datetime.date(value.split(".")[2], value.split(".")[1], value.split(".")[0])
-
-    @property
-    def occupation_end(self):
-        return self.__occupation_end
-    
-    @occupation_end.setter
-    def occupation_end(self, value):
-        self.__occupation_end = datetime.date(value.split(".")[2], value.split(".")[1], value.split(".")[0])
     
     def __repr__(self) -> str:
-        return ' '.join([self.number, str(self.capacity), self.comfort, self.type])
+        return '№' + ' '.join([self.number, str(self.capacity), self.comfort, self.type])
 
 class BookingApplic:
     '''
@@ -191,7 +162,7 @@ class BookingApplic:
         return self.__price_per_person
 
     def __str__(self):
-        accom_date = '.'.join([str(x) for x in self.accomod_date])
+        accom_date = '.'.join([f'{x:02d}' for x in self.accomod_date])
         return self.booking_date + ' ' +  self.last_name + ' ' + self.first_name + ' ' + self.family_name + ' ' + \
             accom_date
 
@@ -238,7 +209,6 @@ class Hotel:
         self.total_profit = 0
         self.loss_profit = 0
         self.free_aparts = len(self.__apartments)
-        self.occupied_aparts = 0
         self.apart_hier = {1: {}, 2: {}, 3: {}, 4: {}, 5: {}, 6: {}}
         
         for capacity in self.apart_hier:
@@ -290,10 +260,8 @@ class Hotel:
         for i in range(1, booking.accomod_days + 1):
             date = datetime.date(year=booking.accomod_date[-1], month=booking.accomod_date[-2], \
                                  day=booking.accomod_date[-3]) + datetime.timedelta(days=i)
-            
-            month = date.month if len(str(date.month)) == 2 else f'0{date.month}'
 
-            result_date = f'{date.day}.{month}.{date.year}'
+            result_date = f'{date.day:02d}.{date.month:02d}.{date.year}'
             booking_period.append(result_date) #список дат, на которые клиент желает заселиться
         capacity = booking.people_count
 
@@ -313,10 +281,10 @@ class Hotel:
 
                                 if answer != 0:
                                     self.total_profit += offer_price * booking.accomod_days * booking.people_count
-                                    apart.occupied_set.add(x for x in booking_period)
-                                    self.occupied_aparts += 1
+                                    for x in booking_period:
+                                        apart.occupied_set.add(x)
                                     success = True
-                                    msg = f'{booking} забронировал {apart}. Стоимость: {offer_price * booking.accomod_days * booking.people_count}'
+                                    msg = f'{booking} забронировал {apart} c питанием {catering}. Стоимость: {offer_price * booking.accomod_days * booking.people_count}'
                                     print(msg)
                                 else:
                                     refuse = True
@@ -327,15 +295,7 @@ class Hotel:
 
         if (not success) and (not refuse):
             self.loss_profit += booking.max_spend_per_person
-            print(f'Не удалось заселить клиента {booking.last_name} {booking.first_name} {booking.family_name}. Потерянная выручка: {booking.max_spend_per_person * booking.accomod_days * booking.people_count}')             
-
-    def calculate_occupation(self, apart_type=None):
-        if apart_type is None:
-            apart_occup = [apart.occupied for apart in self.apartments]
-        else:
-            apart_occup = [apart.occupied for apart in self.apartments if apart.type == apart_type]
-        occup_percent = apart_occup.count(True) / len(apart_occup)
-        return occup_percent
+            print(f'Не удалось заселить клиента {booking.last_name} {booking.first_name} {booking.family_name}. Потерянная выручка: {booking.max_spend_per_person * booking.accomod_days * booking.people_count}')
 
 class Model:
     '''
@@ -379,39 +339,47 @@ class Model:
             date = datetime.date(year=int(self.start_date.split('.')[-1]), month=int(self.start_date.split('.')[-2]), \
                                  day=int(self.start_date.split('.')[-3])) + datetime.timedelta(days=i)
             
-            month = date.month if len(str(date.month)) == 2 else f'0{date.month}'
-            day = date.day if len(str(date.day)) == 2 else f'0{date.day}'
-            result_date = f'{day}.{month}.{date.year}'
+            result_date = f'{date.day:02d}.{date.month:02d}.{date.year}'
             date_lst.append(result_date)
 
         yest_profit = 0
         yest_loss = 0
 
         for date in date_lst:
-            print(date)
+            print(f"------------------------------------------------------------------------------{date}------------------------------------------------------------------------------")
             daily_bookings = filter(lambda x: x.booking_date == date, bookings_list) 
 
             for booking in daily_bookings:
                 self.hotel.calculate_price(booking)
-
-            for apart in self.hotel.apartments:
-                apart.occupied =  False
-                if date in apart.occupied_set:
-                    apart.occupied =  True
+                print()
 
             self.daily_profit = self.hotel.total_profit - yest_profit
             yest_profit = self.hotel.total_profit
             self.daily_loss_profit = self.hotel.loss_profit - yest_loss
             yest_loss = self.hotel.loss_profit
+            print()
             print('Полученная за день выручка: ', self.daily_profit)
             print('Потерянная за день выручка: ', self.daily_loss_profit)
-            print('Общая загруженность:', self.hotel.calculate_occupation())
-            occup_dict = dict.fromkeys(self.hotel.types)
+            
+            occupations = 0
+            occup_dict = dict.fromkeys(self.hotel.types, 0)
+
+            for apart in self.hotel.apartments:
+                if date in apart.occupied_set:
+                    occupations += 1
+                    if apart.type in occup_dict:
+                        occup_dict[apart.type] += 1
+            
             for apart_type in occup_dict:
-                occup_dict[apart_type] = self.hotel.calculate_occupation(apart_type)
-            print('Загруженность по типам:', occup_dict)
-            print()
+                occup_dict[apart_type] = round(occup_dict[apart_type] / len(list(apart for apart in self.hotel.apartments if apart.type == apart_type)), 2) * 100
+            
+            print('Количество занятых номеров: ', occupations)
+            print('Количество свободных номеров: ', len(self.hotel.apartments) - occupations)
+            print('Загруженность: ', round(occupations / len(self.hotel.apartments), 2) * 100, '%')
+            print('Загруженность по типам: ', end = '')
+            for apart_type in occup_dict:
+                print(f'{apart_type}: {occup_dict[apart_type]}% ', end = '')
+            print('\n')
 
         print('Суммарная вырчука: ', self.hotel.total_profit)
         print('Потерянная выручка: ', self.hotel.loss_profit)
-        
