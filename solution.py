@@ -1,14 +1,42 @@
 import datetime
 import random
 
-class Apartment():
+class Apartment:
+    '''
+    The Apartment class represents an apartment with various attributes such as number, type, capacity, comfort, price per person, and occupation details.
+
+    Attributes:
+    ------------
+    - __number (str): The number of the apartment.
+    - __type (str): The type of the apartment.
+    - __capacity (int): The capacity of the apartment.
+    - __comfort (str): The comfort level of the apartment.
+    - __price_per_person (float): The price per person for the apartment.
+    - price_with_catering (dict): A dictionary to store prices with catering options.
+    - __occupied (bool): Indicates if the apartment is currently occupied.
+    - __occupation_start (datetime.date): The start date of the occupation.
+    - __occupation_end (datetime.date): The end date of the occupation.
+    - occupied_set (set): A set to store occupied apartments.
+
+    Properties:
+    ------------
+    - number: Getter for the apartment number.
+    - type: Getter for the apartment type.
+    - capacity: Getter for the apartment capacity.
+    - comfort: Getter for the apartment comfort level.
+    - price_per_person: Getter and setter for the price per person.
+    - occupied: Getter and setter for the occupied status.
+    - occupation_start: Getter and setter for the occupation start date.
+    - occupation_end: Getter and setter for the occupation end date.
+    '''
+
     def __init__(self, number, type, capacity, comfort):
         self.__number = number
         self.__type = type
         self.__capacity = int(capacity)
         self.__comfort = comfort
         self.__price_per_person = 0.0
-        self.price_with_catering = {}
+        self.__price_with_catering = {}
         self.__occupied = False
         self.__occupation_start = None
         self.__occupation_end = None
@@ -68,6 +96,34 @@ class Apartment():
         return ' '.join([self.number, str(self.capacity), self.comfort, self.type])
 
 class BookingApplic:
+    '''
+    The BookingApplic class represents a booking application with attributes related to booking details such as booking date, last name, first name, family name, number of people, accommodation date, accommodation days, maximum spend per person, and price per person.
+
+    Attributes:
+    ------------
+    - __booking_date (str): The date of the booking.
+    - __last_name (str): The last name of the person making the booking.
+    - __first_name (str): The first name of the person making the booking.
+    - __family_name (str): The family name of the person making the booking.
+    - __people_count (int): The number of people in the booking.
+    - __accomod_date (list): The date of accommodation split into day, month, and year.
+    - __accomod_days (int): The number of days for accommodation.
+    - __max_spend_per_person (int): The maximum spend allowed per person.
+    - __price_per_person (float): The price per person for the booking.
+
+    Properties:
+    ------------
+    - booking_date: Getter for the booking date.
+    - last_name: Getter for the last name.
+    - first_name: Getter for the first name.
+    - family_name: Getter for the family name.
+    - people_count: Getter and setter for the number of people.
+    - accomod_date: Getter and setter for the accommodation date.
+    - accomod_days: Getter and setter for the number of accommodation days.
+    - max_spend_per_person: Getter and setter for the maximum spend per person.
+    - price_per_person: Getter for the price per person.
+    '''
+
     def __init__(self, booking_date, last_name, first_name, family_name, people_count, accomod_date, accomod_days, max_spend_per_person):
         self.__last_name = last_name
         self.__booking_date = booking_date
@@ -140,6 +196,24 @@ class BookingApplic:
             accom_date
 
 class Hotel:
+    '''
+    The Hotel class represents a hotel with attributes and methods related to managing hotel apartments and bookings.
+
+    Attributes:
+    ------------
+    - __type_price (dict): A dictionary mapping apartment types to their base prices.
+    - __comfort_price_coefficient (dict): A dictionary mapping comfort levels to price coefficients.
+    - __catering_price (dict): A dictionary mapping catering options to their prices.
+
+    Methods:
+    ---------
+    - load_apartments(file): Static method to load apartment data from a file and return a list of Apartment objects.
+    - calculate_price(booking: BookingApplic): Calculates the price for a booking based on available apartments and booking details.
+
+    Properties:
+    ------------
+    - apartments: Getter for the list of apartments in the hotel.
+    '''
     __type_price = {
         "люкс": 4100.00,
         "полулюкс": 3200.00,
@@ -199,6 +273,10 @@ class Hotel:
 
 
     def calculate_price(self, booking: BookingApplic):
+        '''
+        Calculates the price for a booking based on available apartments and booking details.
+        '''
+        
         discount = False
         disc_coef = 0.3
         booking_period = []
@@ -249,6 +327,23 @@ class Hotel:
 
 
 class Model:
+    '''
+    The Model class represents a model for managing hotel bookings and calculating daily profits and losses.
+
+    Attributes:
+    -----------
+    - daily_profit (float): The daily profit earned by the hotel.
+    - daily_loss_profit (float): The daily loss in profit for the hotel.
+    - hotel (Hotel): The Hotel object associated with the model.
+    - start_date (str): The start date for the model.
+
+    Methods:
+    --------
+    - load_booking(file): Static method to load booking data from a file and return a list of BookingApplic objects.
+    - start(self, booking_file): Method to start the model processing by loading bookings, 
+    calculating daily profits and losses, and displaying results.
+    '''
+
     def __init__(self, hotel: Hotel, start_date):
         self.daily_profit = 0
         self.daily_loss_profit = 0
@@ -261,6 +356,11 @@ class Model:
             return [BookingApplic(*[x for x in line.split()]) for line in f]
     
     def start(self, booking_file):
+        '''
+        Method to start the model processing by loading bookings, 
+        calculating daily profits and losses, and displaying results.
+        '''
+
         bookings_list = Model.load_booking(booking_file)
 
         date_lst = []
@@ -295,9 +395,3 @@ class Model:
         print('Суммарная вырчука: ', self.hotel.total_profit)
         print('Потерянная выручка: ', self.hotel.loss_profit)
         
-
-
-        
-               
-
-    
