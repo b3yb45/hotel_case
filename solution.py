@@ -36,7 +36,7 @@ class Apartment:
         self.__capacity = int(capacity)
         self.__comfort = comfort
         self.__price_per_person = 0.0
-        self.__price_with_catering = {}
+        self.price_with_catering = {}
         self.__occupied = False
         self.__occupation_start = None
         self.__occupation_end = None
@@ -276,7 +276,7 @@ class Hotel:
         '''
         Calculates the price for a booking based on available apartments and booking details.
         '''
-        
+
         discount = False
         disc_coef = 0.3
         booking_period = []
@@ -362,7 +362,6 @@ class Model:
         '''
 
         bookings_list = Model.load_booking(booking_file)
-
         date_lst = []
         
         for i in range(32):
