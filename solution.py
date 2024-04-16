@@ -203,6 +203,7 @@ class Hotel:
         disc_coef = 0.3
         booking_period = []
         success = False
+        refuse = False
 
         for i in range(1, booking.accomod_days + 1):
             date = datetime.date(year=booking.accomod_date[-1], month=booking.accomod_date[-2], \
@@ -212,16 +213,16 @@ class Hotel:
 
             result_date = f'{date.day}.{month}.{date.year}'
             booking_period.append(result_date) #список дат, на которые клиент желает заселиться
-        
-        for capacity in range(booking.people_count, 7):
+            capacity = booking.people_count
+
+        while success == False and capacity < 7 and refuse == False:
             if capacity != booking.people_count:
                 discount = True
 
             for apart_type in self.apart_hier[capacity]: #идем по вместимости
-
-                for apart in self.apart_hier[capacity][apart_type]: #идем по классу номера
-                    if apart.price_per_person * (1 - disc_coef*discount) <= booking.max_spend_per_person \
-                        and set(booking_period).intersection(apart.occupied_set) == set(): #смотрим, подходит ли по цене и не занят ли номер на эти даты
+                for apart in self.apart_hier[capacity][apart_type]: 
+                    if apart.price_per_person * (1 - disc_coef*discount) <= booking.max_spend_per_person and \
+                        set(booking_period).intersection(apart.occupied_set) == set() and refuse != True and success != True: #смотрим, подходит ли по цене и не занят ли номер на эти даты
     
                         for catering in apart.price_with_catering:
                             if apart.price_with_catering[catering] * (1 - disc_coef*discount) <= booking.max_spend_per_person:
@@ -236,13 +237,15 @@ class Hotel:
                                     msg = f'{booking} забронировал {apart}'
                                     print(msg)
                                 else:
+                                    refuse = True
                                     self.loss_profit += offer_price * booking.accomod_days * booking.people_count
-                                    print('Клиент отказался от предложения.')
-                                
+                                    print(f'Клиент {booking.last_name} {booking.first_name} {booking.family_name} отказался от предложения.')
+                                break  
+            capacity += 1          
 
-        if success == False:
+        if success == False and refuse == False:
             self.loss_profit += booking.max_spend_per_person
-            print('Не удалось заселить клиента.')             
+            print(f'Не удалось заселить клиента {booking.last_name} {booking.first_name} {booking.family_name}.')             
 
 
 class Model:
