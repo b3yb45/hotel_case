@@ -1,5 +1,6 @@
 import datetime
 import random
+import ru_local as ru
 
 class Apartment:
     '''
@@ -179,23 +180,24 @@ class Hotel:
     ------------
     - apartments: Getter for the list of apartments in the hotel.
     '''
+
     __type_price = {
-        "люкс": 4100.00,
-        "полулюкс": 3200.00,
-        "двухместный": 2300.00, 
-        "одноместный": 2900.00
+        ru.lux: 4100.00,
+        ru.semilux: 3200.00,
+        ru.double: 2300.00, 
+        ru.single: 2900.00
     }
 
     __comfort_price_coefficient = {
-        "апартамент": 1.5,
-        "стандарт_улучшенный": 1.2,
-        "стандарт": 1.0
+        ru.apart: 1.5,
+        ru.std_improved: 1.2,
+        ru.std: 1.0
     }
 
     __catering_price = {
-        "полупансион": 1000.0,
-        "завтрак": 280.0,
-        "без питания": 0.0
+        ru.half_board: 1000.0,
+        ru.breakfast: 280.0,
+        ru.no_catering: 0.0
     }
 
     def __init__(self, apartments_file):
@@ -278,18 +280,18 @@ class Hotel:
                                     for x in booking_period:
                                         apart.occupied_set.add(x)
                                     success = True
-                                    msg = f'{booking} забронировал {apart} c питанием {catering}. Стоимость: {offer_price * booking.accomod_days * booking.people_count}'
+                                    msg = f'{booking} {ru.booked} {apart} {ru.with_catering} {catering}. {ru.price}: {offer_price * booking.accomod_days * booking.people_count}'
                                     print(msg)
                                 else:
                                     refuse = True
                                     self.loss_profit += offer_price * booking.accomod_days * booking.people_count
-                                    print(f'Клиент {booking.last_name} {booking.first_name} {booking.family_name} отказался от предложения. Потерянная выручка: {offer_price * booking.accomod_days * booking.people_count}')
+                                    print(f'{ru.client} {booking.last_name} {booking.first_name} {booking.family_name} {ru.offer_reject}. {ru.lost_rvn}: {offer_price * booking.accomod_days * booking.people_count}')
                                 break  
             capacity += 1          
 
         if (not success) and (not refuse):
             self.loss_profit += booking.max_spend_per_person
-            print(f'Не удалось заселить клиента {booking.last_name} {booking.first_name} {booking.family_name}. Потерянная выручка: {booking.max_spend_per_person * booking.accomod_days * booking.people_count}')
+            print(f'{ru.check_in_fail} {booking.last_name} {booking.first_name} {booking.family_name}. {ru.lost_rvn}: {booking.max_spend_per_person * booking.accomod_days * booking.people_count}')
 
 class Model:
     '''
@@ -352,8 +354,8 @@ class Model:
             self.daily_loss_profit = self.hotel.loss_profit - yest_loss
             yest_loss = self.hotel.loss_profit
             print('')
-            print('Полученная за день выручка: ', self.daily_profit)
-            print('Потерянная за день выручка: ', self.daily_loss_profit)
+            print(f'{ru.daily_rvn}:', self.daily_profit)
+            print(f'{ru.daily_lost_rvn}:', self.daily_loss_profit)
             
             occupations = 0
             occup_dict = dict.fromkeys(self.hotel.types, 0)
@@ -367,13 +369,13 @@ class Model:
             for apart_type in occup_dict:
                 occup_dict[apart_type] = round(occup_dict[apart_type] / len(list(apart for apart in self.hotel.apartments if apart.type == apart_type)), 2) * 100
             
-            print('Количество занятых номеров: ', occupations)
-            print('Количество свободных номеров: ', len(self.hotel.apartments) - occupations)
-            print('Загруженность: ', round(occupations / len(self.hotel.apartments), 2) * 100, '%')
-            print('Загруженность по типам: ', end = '')
+            print(f'{ru.occup_apart}:', occupations)
+            print(f'{ru.vacant_apart}:', len(self.hotel.apartments) - occupations)
+            print(f'{ru.occup_percent}:', round(occupations / len(self.hotel.apartments), 2) * 100, '%')
+            print(f'{ru.occup_type_percent}:', end = '')
             for apart_type in occup_dict:
-                print(f'{apart_type}: {occup_dict[apart_type]}% ', end = '')
+                print(f'{apart_type}: {occup_dict[apart_type]}%; ', end = '')
             print('\n')
 
-        print('Суммарная вырчука: ', self.hotel.total_profit)
-        print('Потерянная выручка: ', self.hotel.loss_profit)
+        print(f'{ru.total_rvn}:', self.hotel.total_profit)
+        print(f'{ru.total_lost_rvn}:', self.hotel.loss_profit)
